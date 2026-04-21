@@ -1,0 +1,43 @@
+# Cost mapping for LLM routing decisions.
+# Models must have allow_routing: true to be used.
+# Costs are per million tokens.
+
+# --- Ollama (Local) ---
+qwen2.5:32b:
+  display_name: "qwen2.5:32b"
+  allow_routing: true
+  input_cost_per_mtok: 0.0
+  output_cost_per_mtok: 0.0
+
+# --- OpenRouter ---
+qwen/qwen3-30b-a3b-thinking-2507:
+  display_name: "qwen3-30b-a3b-thinking-2507"
+  allow_routing: true
+  input_cost_per_mtok: 0.20
+  output_cost_per_mtok: 0.60
+
+qwen/qwen3-235b-a22b-2507:
+  display_name: "qwen3-235b-a22b-2507"
+  allow_routing: true
+  input_cost_per_mtok: 0.50
+  output_cost_per_mtok: 1.50
+
+# --- Cerebras ---
+cerebras/qwen-3-235b-a22b-instruct-2507:
+  display_name: "qwen-3-235b-a22b-instruct-2507"
+  allow_routing: true
+  free:
+    allow_routing: true
+    input_cost_per_mtok: 0.0
+    output_cost_per_mtok: 0.0
+  paid:
+    allow_routing: true
+    input_cost_per_mtok: 0.20
+    output_cost_per_mtok: 0.60
+
+# Fallback
+default:
+  display_name: "Unknown"
+  allow_routing: false
+  input_cost_per_mtok: 0.0
+  output_cost_per_mtok: 0.0

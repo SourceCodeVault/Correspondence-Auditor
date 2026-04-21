@@ -1,0 +1,10 @@
+# Core
+pyyaml>=6.0
+jinja2>=3.1
+python-dotenv>=1.0
+json-repair>=0.25
+
+# LLM Backends (configure one or more)
+ollama>=0.4
+openai>=1.30          # Used by the OpenRouter client
+cerebras-cloud-sdk>=1.0
