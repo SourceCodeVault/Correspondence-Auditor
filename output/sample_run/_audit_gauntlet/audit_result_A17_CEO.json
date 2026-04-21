@@ -1,0 +1,55 @@
+{
+  "filename": "result_input_A17_CEO_1_0_0_core.json",
+  "gates": {
+    "gate_1": {
+      "status": "PASS",
+      "issues": []
+    },
+    "gate_2": {
+      "status": "FAIL",
+      "verdicts": [
+        {
+          "claim": "100 trillion daily signals",
+          "status": "SUPPORTED",
+          "source": "Key Features",
+          "quote": "Leverages 100 trillion daily signals and unified graph analytics to detect threats faster."
+        },
+        {
+          "claim": "accelerating incident investigations",
+          "status": "SUPPORTED",
+          "source": "Key Features",
+          "quote": "use generative AI for identifying policy gaps and accelerating incident investigations."
+        },
+        {
+          "claim": "99.99% monthly resiliency guarantee",
+          "status": "SUPPORTED",
+          "source": "Key Features",
+          "quote": "Offers a 99.99% service resiliency guarantee each month to ensure operational continuity."
+        },
+        {
+          "claim": "Missing Independent Recovery Mechanism",
+          "status": "CONTRADICTED",
+          "source": "Main Body",
+          "quote": "Entra ID provides the independent recovery paths and architectural safeguards required for fiduciary peace of mind."
+        },
+        {
+          "claim": "Missing Defined Failure Modes",
+          "status": "SUPPORTED",
+          "source": null,
+          "quote": null
+        }
+      ],
+      "failures": [
+        {
+          "claim": "Missing Independent Recovery Mechanism",
+          "status": "CONTRADICTED",
+          "source": "Main Body",
+          "quote": "Entra ID provides the independent recovery paths and architectural safeguards required for fiduciary peace of mind."
+        }
+      ],
+      "model_thinking": "1. \"100 trillion daily signals\": Found verbatim in Key Features section (\"Leverages 100 trillion daily signals...\").\n2. \"accelerating incident investigations\": Found verbatim in Key Features section (\"accelerating incident investigations\").\n3. \"99.99% monthly resiliency guarantee\": Found verbatim in Key Features section (\"99.99% service resiliency guarantee each month\").\n4. \"Missing Independent Recovery Mechanism\": Text explicitly states \"independent recovery paths\" in main body (\"Entra ID provides the independent recovery paths...\"), contradicting the \"missing\" claim. Concept is present (synonym: \"paths\" vs \"mechanism\" doesn't negate presence).\n5. \"Missing Defined Failure Modes\": Text contains no mention of \"failure modes,\" \"failure scenarios,\" or related concepts. Verified absence \u2192 SUPPORTED."
+    }
+  },
+  "final_verdict": "FAIL",
+  "reason": "Fact Check: 1 failures"
+}

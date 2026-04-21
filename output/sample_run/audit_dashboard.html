@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gauntlet Audit Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; color: #0f172a; font-family: 'Inter', sans-serif; }
+        .paper-card { background: white; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 8px; }
+        .accordion-content { transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+        .chevron { transition: transform 0.3s ease; }
+        .rotate-180 { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="p-8 min-h-screen">
+    <div class="max-w-6xl mx-auto space-y-8">
+        <div class="flex justify-between items-end border-b-2 border-slate-800 pb-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Correspondence Audit: Report</h1>
+                <p class="text-sm font-mono text-slate-500">sample_run</p>
+            </div>
+            <div class="text-right">
+                <div class="text-xs font-bold uppercase tracking-widest text-slate-500">Total Scanned</div>
+                <div class="text-2xl font-black text-slate-800">1 Files</div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="paper-card p-6 border-l-4 border-l-emerald-500">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Passed</h3>
+                <p class="text-3xl font-black text-emerald-600">0</p>
+            </div>
+            <div class="paper-card p-6 border-l-4 border-l-rose-500">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Failed</h3>
+                <p class="text-3xl font-black text-rose-600">1</p>
+            </div>
+            <div class="paper-card p-6 border-l-4 border-l-amber-500">
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Errors</h3>
+                <p class="text-3xl font-black text-amber-600">0</p>
+            </div>
+            <div class="paper-card p-4 flex justify-center items-center">
+                <canvas id="passFailChart" style="max-height: 100px;"></canvas>
+            </div>
+        </div>
+        <div class="paper-card">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 rounded-t-8 flex justify-between items-center">
+                <h3 class="font-bold text-slate-700">Detailed Audit Records</h3>
+                <span class="text-xs text-slate-400">Showing full telemetry (click row to collapse)</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                     <thead class="bg-white sticky top-0 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-4 font-bold text-slate-900 w-1/3">Filename</th>
+                            <th class="px-6 py-4 font-bold text-slate-900 w-24">Verdict</th>
+                            <th class="px-6 py-4 font-bold text-slate-900">Failure Summary</th>
+                        </tr>
+                     </thead>
+                     <tbody class="divide-y divide-slate-100" id="records-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        const DATA = {"meta": {"run_id": "sample_run", "total": 1, "source_map": {}}, "stats": {"PASS": 0, "FAIL": 1, "ERROR": 0}, "records": [{"filename": "result_input_A17_CEO_1_0_0_core.json", "verdict": "FAIL", "details": ["Fact Check [CONTRADICTED]: Missing Independent Recovery Mechanism"], "deep_details": {"gate_2": {"status": "FAIL", "verdicts": [{"claim": "100 trillion daily signals", "status": "SUPPORTED", "source": "Key Features", "quote": "Leverages 100 trillion daily signals and unified graph analytics to detect threats faster."}, {"claim": "accelerating incident investigations", "status": "SUPPORTED", "source": "Key Features", "quote": "use generative AI for identifying policy gaps and accelerating incident investigations."}, {"claim": "99.99% monthly resiliency guarantee", "status": "SUPPORTED", "source": "Key Features", "quote": "Offers a 99.99% service resiliency guarantee each month to ensure operational continuity."}, {"claim": "Missing Independent Recovery Mechanism", "status": "CONTRADICTED", "source": "Main Body", "quote": "Entra ID provides the independent recovery paths and architectural safeguards required for fiduciary peace of mind."}, {"claim": "Missing Defined Failure Modes", "status": "SUPPORTED", "source": null, "quote": null}], "failures": [{"claim": "Missing Independent Recovery Mechanism", "status": "CONTRADICTED", "source": "Main Body", "quote": "Entra ID provides the independent recovery paths and architectural safeguards required for fiduciary peace of mind."}], "model_thinking": "1. \"100 trillion daily signals\": Found verbatim in Key Features section (\"Leverages 100 trillion daily signals...\").\n2. \"accelerating incident investigations\": Found verbatim in Key Features section (\"accelerating incident investigations\").\n3. \"99.99% monthly resiliency guarantee\": Found verbatim in Key Features section (\"99.99% service resiliency guarantee each month\").\n4. \"Missing Independent Recovery Mechanism\": Text explicitly states \"independent recovery paths\" in main body (\"Entra ID provides the independent recovery paths...\"), contradicting the \"missing\" claim. Concept is present (synonym: \"paths\" vs \"mechanism\" doesn't negate presence).\n5. \"Missing Defined Failure Modes\": Text contains no mention of \"failure modes,\" \"failure scenarios,\" or related concepts. Verified absence \u2192 SUPPORTED."}, "gate_3": {}}}]};
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '-';
+            if (typeof str !== 'string') return String(str);
+            return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            const recBody = document.getElementById('records-body');
+            DATA.records.forEach((rec, idx) => {
+                const tr = document.createElement('tr');
+                let statusBadge = '';
+                if(rec.verdict==='PASS') statusBadge='<span class="px-2 py-1 rounded bg-emerald-100 text-emerald-800 text-xs font-bold">PASS</span>';
+                else if(rec.verdict==='FAIL') statusBadge='<span class="px-2 py-1 rounded bg-rose-100 text-rose-800 text-xs font-bold">FAIL</span>';
+                else statusBadge='<span class="px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs font-bold">ERROR</span>';
+                let detailsHTML = rec.verdict==='PASS' ? '<span class="text-slate-400 italic">No anomalies detected</span>' :
+                    '<ul class="list-disc pl-4 text-rose-700 text-xs space-y-1">'+rec.details.map(d=>`<li>${escapeHTML(d)}</li>`).join('')+'</ul>';
+                tr.className="cursor-pointer transition "+(rec.verdict==='FAIL'?"bg-rose-50/20 hover:bg-rose-50/60":"hover:bg-slate-50");
+                tr.onclick=()=>{
+                    const detailRow=document.getElementById(`detail-${idx}`);
+                    const chevron=document.getElementById(`chevron-${idx}`);
+                    if(detailRow.classList.contains('hidden')){detailRow.classList.remove('hidden');chevron.classList.add('rotate-180');}
+                    else{detailRow.classList.add('hidden');chevron.classList.remove('rotate-180');}
+                };
+                tr.innerHTML=`
+                    <td class="px-6 py-4 font-mono text-slate-600 text-xs border-r border-slate-100 flex justify-between items-center">
+                        ${escapeHTML(rec.filename)}
+                        <svg id="chevron-${idx}" class="w-4 h-4 text-slate-400 chevron rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </td>
+                    <td class="px-6 py-4">${statusBadge}</td>
+                    <td class="px-6 py-4">${detailsHTML}</td>
+                `;
+                recBody.appendChild(tr);
+                const detailTr=document.createElement('tr');
+                detailTr.id=`detail-${idx}`;
+                detailTr.className="bg-slate-50 border-b-2 border-slate-200 shadow-inner";
+                let deepHTML=`<div class="p-6 space-y-6">`;
+                if(rec.deep_details.gate_2 && rec.deep_details.gate_2.model_thinking){
+                    deepHTML+=`<div><h4 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-2">Gate 2: Librarian (Thinking Trace)</h4>
+                        <div class="p-4 bg-white border border-slate-200 rounded whitespace-pre-wrap font-mono text-xs text-slate-700 max-h-60 overflow-y-auto leading-relaxed shadow-sm">${escapeHTML(rec.deep_details.gate_2.model_thinking)}</div></div>`;
+                    if(rec.deep_details.gate_2.verdicts){
+                        deepHTML+=`<div><h4 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-2 mt-4">Full Claim Verification Matrix</h4>
+                            <div class="border border-slate-200 rounded overflow-hidden shadow-sm">
+                                <table class="w-full text-left bg-white text-xs">
+                                    <thead class="bg-slate-100 text-slate-600"><tr><th class="p-3 border-b">Persona Claim</th><th class="p-3 border-b">Verdict</th><th class="p-3 border-b">Source</th><th class="p-3 border-b">Source Quote</th></tr></thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        ${rec.deep_details.gate_2.verdicts.map(v=>`
+                                            <tr>
+                                                <td class="p-3 font-medium text-slate-800">${escapeHTML(v.claim)}</td>
+                                                <td class="p-3 font-bold ${v.status==='SUPPORTED'?'text-emerald-600':'text-rose-600'}">${escapeHTML(v.status)}</td>
+                                                <td class="p-3 font-mono text-[10px] text-indigo-600 font-bold">${escapeHTML(v.source||'-')}</td>
+                                                <td class="p-3 font-mono text-[10px] text-slate-500 italic break-words">${escapeHTML(v.quote)}</td>
+                                            </tr>`).join('')}
+                                    </tbody>
+                                </table>
+                            </div></div>`;
+                    }
+                }
+                if(rec.deep_details.gate_3 && rec.deep_details.gate_3.model_thinking){
+                    deepHTML+=`<div><h4 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-2 mt-4">Gate 3: Psychologist (Thinking Trace)</h4>
+                        <div class="p-4 bg-white border border-slate-200 rounded whitespace-pre-wrap font-mono text-xs text-slate-700 max-h-60 overflow-y-auto leading-relaxed shadow-sm">${escapeHTML(rec.deep_details.gate_3.model_thinking)}</div></div>`;
+                }
+                deepHTML+=`</div>`;
+                if(deepHTML===`<div class="p-6 space-y-6"></div>`){
+                    deepHTML=`<div class="p-6 text-sm text-slate-400 italic">No deep telemetry recorded for this run.</div>`;
+                }
+                detailTr.innerHTML=`<td colspan="3" class="p-0">${deepHTML}</td>`;
+                recBody.appendChild(detailTr);
+            });
+            const ctx=document.getElementById('passFailChart');
+            new Chart(ctx,{
+                type:'doughnut',
+                data:{labels:['Pass','Fail','Error'],datasets:[{data:[DATA.stats.PASS,DATA.stats.FAIL,DATA.stats.ERROR],backgroundColor:['#10b981','#f43f5e','#f59e0b'],borderWidth:0}]},
+                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'70%'}
+            });
+        });
+    </script>
+</body>
+</html>

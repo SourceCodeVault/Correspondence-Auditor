@@ -1,0 +1,42 @@
+template_name: "SD_Entra_Eval"
+prompt_manifest_path: "P01_SIM_B2B_DECIMAX_v4.json"
+situation: >
+  Your organization is a Fortune 500 enterprise evaluating a new Unified Endpoint Management (UEM) platform. As a fiduciary and risk-sensitive board member, you prioritize operational resilience over standalone innovation. You are looking for explicitly defined failure modes, strict limits on the scope of potential damage if a breach occurs, and proof that the system can be recovered independently of its own administrative layers. You view architectural risks and marketing manipulation as potential liability if the downside risk is not appropriately contained.
+question_asked: >
+  Evaluate this vendor's marketing material for structural IT risk, operational resilience, control plane fragility, and unbounded downside. Compare their promises of efficiency against your requirement for verifiable constraints, segmented authority, and independent recovery paths. Based on this full-spectrum evaluation, does the vendor provide sufficient empirical proof of accountability and strictly limited failure modes to safely authorize the architectural approval and budget for this platform?  (Answer Yes, No, or Hesitate)
+target_action: "authorize the architectural approval and budget for this platform"
+material: |
+
+    Subject: Strengthening Operational Resilience with Microsoft Entra ID
+
+    Hi [Name],
+
+    As organizations transition to AI-driven operations, the traditional identity perimeter faces unprecedented structural risk. For a risk-sensitive enterprise, the "efficiency" of a cloud transition must be balanced against verifiable constraints and independent recovery paths.
+
+    **Microsoft Entra ID** (formerly Azure AD) is engineered to provide that balance. Rather than just facilitating logins, it acts as a resilient control plane for your entire digital estate. We are helping Fortune 500 leaders secure their infrastructure through:
+
+    * **Verifiable Uptime:** A 99.99% monthly resiliency guarantee that prioritizes your operational continuity.
+    * **Measured Defense:** Empirical evidence showing a 99.22% reduction in compromise risk when utilizing our integrated protection layers.
+    * **Segmented Authority:** Granular control through Privileged Identity Management, ensuring administrative power is limited, audited, and strictly scoped.
+    * **Agentic AI Security:** Empowering your SOC with Security Copilot to manage and protect your environment at the speed and scale of modern threats.
+
+    Whether you are managing legacy on-premises systems or a multicloud AI architecture, Entra ID provides the independent recovery paths and architectural safeguards required for fiduciary peace of mind.
+
+    I’d love to share how we can tailor these constraints to your specific risk profile. Would you be open to a brief technical overview next week?
+
+    Best regards,
+
+    Bob
+    Enterprise Identity Architect
+
+    Key Features
+        * **Unified Identity Fabric:** Provides a single solution to manage and secure identities and applications across cloud and on-premises environments, integrating with legacy apps, SaaS, and AI assistants.
+        * **Guaranteed Resiliency:** Offers a 99.99% service resiliency guarantee each month to ensure operational continuity.
+        * **Quantifiable Risk Reduction:** Deployment of MFA within the platform is associated with a 99.22% reduction in identity compromise risk.
+        * **Adaptive Zero Trust Access:** Employs risk-based conditional access and strong authentication to verify every access attempt.
+        * **Privileged Access Governance:** Features Privileged Identity Management (PIM) to enforce least-privilege access and reduce the attack surface of administrative accounts.
+        * **AI-Powered Operations:** Integrates with Security Copilot to use generative AI for identifying policy gaps and accelerating incident investigations.
+        * **Identity Protection:** Specifically monitors for identity compromise and provides automated responses to suspicious sign-in behavior.
+        * **Verifiable Credentials:** Includes a standards-based decentralized identity mapping system for issuing and verifying digital credentials.
+        * **Extensive Signal Intelligence:** Leverages 100 trillion daily signals and unified graph analytics to detect threats faster.
+    
