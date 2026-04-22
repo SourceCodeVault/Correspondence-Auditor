@@ -1,18 +1,34 @@
-#  Correspondence Auditor — Multi-Stage Audit Engine
+# Correspondence Auditor — Three-Stage Gauntlet for LLM-as-Judge Pipelines
 
-A three-gate audit pipeline that validates AI-generated simulations against source material. Part of the Source Code Vault Ltd cognitive simulation framework.
+An open-source, high-integrity audit layer that sits **downstream** of any LLM-as-Judge pipeline. It catches sycophancy, hallucination, and reasoning failures before evaluated outputs reach downstream consumers.
 
-## What It Does
+## The Problem
 
-The audit engine takes simulated outputs (JSON files containing an AI persona's internal monologue, scored factors, and decision rationale) and runs them through three verification gates:
+LLM-as-Judge pipelines are increasingly used to evaluate AI outputs in safety-critical domains. But the evaluating model can tell the evaluated model what it wants to hear rather than what is true. There is currently no standard infrastructure for auditing the judge's own work.
 
-| Gate | Name | Purpose |
-|------|------|---------|
-| **Gate 1** | Sanity Check | Structural validation — required fields, score ranges, forbidden terms |
-| **Gate 2** | The Librarian | Fact verification — every claim the persona made is checked against the original source material |
-| **Gate 3** | The Logic Engine | Logic audit — verifies reasoning consistency and catches domain errors (e.g. demanding irrelevant features) |
+The Correspondence Auditor provides that infrastructure.
 
-Gates 2 and 3 are themselves LLM-powered, using configurable backends (local Ollama, OpenRouter, or Cerebras).
+## How It Works
+
+The audit engine runs every judged output through a **Three-Stage Gauntlet**:
+
+| Gate | Name | What It Does | LLM? |
+|------|------|--------------|------|
+| **Gate 1** | Sanity Check | Deterministic structural validation — required fields, score ranges, forbidden terms | No |
+| **Gate 2** | The Librarian | Semantic truth verification — every claim is checked against **provided source text**, producing tripartite verdicts: `SUPPORTED` / `CONTRADICTED` / `UNSUPPORTED` | Yes |
+| **Gate 3** | The Logic Engine | Logical coherence audit — uses Gate 2's results as context to catch internal contradictions, category errors, and reasoning failures | Yes |
+
+Gates 2 and 3 are LLM-powered but **separated by duty** and **grounded against provided evidence**, not against the model's own beliefs. This is a fundamentally different approach to the "who watches the watchmen" problem.
+
+## Design Principles
+
+**Fail-closed, not fail-open.** Infrastructure errors produce `ERROR` states rather than silent passes. No output reaches downstream consumers without clearing all three gates.
+
+**High recall, false-positive bias.** The system is tuned to minimise the risk of an undetected sycophantic or hallucinated error slipping through. Borderline cases are flagged, not passed.
+
+**Quarantine with reasoning traces.** Failed outputs are quarantined with full reasoning traces for human review — not just a pass/fail label, but the auditor's working shown in full.
+
+**Backend-agnostic.** Gates 2 and 3 support configurable LLM backends (local Ollama, OpenRouter, or Cerebras), so you can run the audit pipeline entirely on-premises if your threat model requires it.
 
 ## Project Structure
 
@@ -33,7 +49,7 @@ Gates 2 and 3 are themselves LLM-powered, using configurable backends (local Oll
 │       ├── openrouter_client.py  # OpenRouter API backend
 │       └── cerebras_client.py    # Cerebras API backend
 ├── requirements.txt
-└── output/                       # Place simulation run folders here
+└── output/                       # Place outputs to audit here
 ```
 
 ## Setup
@@ -58,15 +74,22 @@ For local inference, ensure Ollama is running with the model specified in the pr
 python run_audit.py
 ```
 
-The CLI will prompt you to select a simulation run folder (from `output/`) and an execution target, then offer options to run audits, view results in an interactive HTML dashboard, or archive failures.
+The CLI will prompt you to select an output folder and execution target, then offer options to run audits, view results in an interactive HTML dashboard, or archive failures.
 
 ## Expected Input
 
-Each simulation run folder should contain:
-- `result_*.json` — Persona simulation outputs to audit
-- An input file (`input_*.json` or `input_*.yaml`) containing the source material and evidence sources
-- Optionally, a `_provenance/manifest.json` pointing to the input file
+Each audit run folder should contain:
+
+- JSON outputs from your LLM-as-Judge pipeline (the evaluated outputs to audit)
+- Source material (JSON or YAML) containing the evidence the judge was supposed to evaluate against
+- Optionally, a `_provenance/manifest.json` pointing to the source material
+
+The auditor is **domain-agnostic** — it validates any LLM-as-Judge output against any provided source text. The current reference implementation audits cognitive simulation outputs, but the architecture applies wherever an LLM is judging another LLM's work.
 
 ## Status
 
-This is working production code extracted from a larger workflow. The upstream simulation engine and downstream report generator are not included in this repository.
+Working production code with 16 months of deployment data. Currently being transitioned to community-owned infrastructure under **AGPLv3**.
+
+## License
+
+AGPL-3.0 — ensuring this tool remains a public good and cannot disappear behind a paywall.
