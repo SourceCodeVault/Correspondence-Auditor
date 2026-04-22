@@ -20,6 +20,64 @@ The audit engine runs every judged output through a **Three-Stage Gauntlet**:
 
 Gates 2 and 3 are LLM-powered but **separated by duty** and **grounded against provided evidence**, not against the model's own beliefs. This is a fundamentally different approach to the "who watches the watchmen" problem.
 
+## Interactive Dashboard
+
+The auditor generates a standalone HTML dashboard to visualize run telemetry, failure rates, and the LLM's deep reasoning traces.
+
+[![View Live Dashboard](https://SourceCodeVault.github.io/Correspondence-Auditor/output/sample_run/dashboard.png)](https://SourceCodeVault.github.io/Correspondence-Auditor/output/sample_run/audit_dashboard.html)
+
+*(To view the live demo, click the image above. The dashboard runs entirely in the browser with no backend required).*
+
+## Example Input & Output (The Data Shape)
+
+Developers integrating this pipeline usually want to see exactly what the auditor catches. Here is a real example of the pipeline catching a hallucinated penalty.
+
+**1. The LLM Judge's Output (Input to Auditor)**
+Your initial LLM judge evaluates a vendor and penalizes them for supposedly lacking a feature:
+```json
+{
+  "factor": "Missing Independent Recovery Mechanism",
+  "polarity": -1,
+  "reason_headline": "Structural Risk Gap"
+}
+```
+
+**2. The Ground Truth Source Material**
+The auditor checks the judge's claim against the actual text provided to the judge:
+```text
+"Entra ID provides the independent recovery paths and architectural safeguards required for fiduciary peace of mind."
+```
+
+**3. The Quarantine Trace (Gate 2 Output)**
+Gate 2 catches the contradiction. It fails the run, prevents the output from moving downstream, and generates a strict reasoning trace for the human auditor:
+```json
+{
+  "status": "FAIL",
+  "failures": [
+    {
+      "claim": "Missing Independent Recovery Mechanism",
+      "status": "CONTRADICTED",
+      "source": "Main Body",
+      "quote": "Entra ID provides the independent recovery paths and architectural safeguards required for fiduciary peace of mind."
+    }
+  ],
+  "model_thinking": "Text explicitly states 'independent recovery paths' in main body ('Entra ID provides the independent recovery paths...'), contradicting the 'missing' claim."
+}
+```
+
+## Integrating into Existing Pipelines
+
+The Correspondence Auditor is designed with segregation of duties in mind. While it comes with a CLI (`run_audit.py`) for asynchronous batch processing of files, the core engine is fully modular.
+
+You can import the individual gates directly into your existing Python application and pass them standard dictionaries, entirely bypassing the file system:
+
+```python
+from steps.audit_engine import run_gate_1_sanity, run_gate_2_facts, run_gate_3_logic
+
+# Pass your in-memory JSON objects directly to the gates
+sanity_result = run_gate_1_sanity(llm_output_dict)
+```
+
 ## Design Principles
 
 **Fail-closed, not fail-open.** Infrastructure errors produce `ERROR` states rather than silent passes. No output reaches downstream consumers without clearing all three gates.
