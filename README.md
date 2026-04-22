@@ -151,3 +151,7 @@ Working production code with 16 months of deployment data. Currently being trans
 ## License
 
 AGPL-3.0 — ensuring this tool remains a public good and cannot disappear behind a paywall.
+
+## Contact & Maintainer
+Adrian St. Vaughan
+* LinkedIn: [Adrian St. Vaughan](https://www.linkedin.com/in/adrianstvaughan/)
