@@ -88,6 +88,30 @@ sanity_result = run_gate_1_sanity(llm_output_dict)
 
 **Backend-agnostic.** Gates 2 and 3 support configurable LLM backends (local Ollama, OpenRouter, or Cerebras), so you can run the audit pipeline entirely on-premises if your threat model requires it.
 
+## Deployment Modes & Governance Posture
+
+The Correspondence Auditor supports two deployment modes with fundamentally different governance postures.
+
+### Mode A: Inline Halt Gate (Recommended)
+
+The Auditor sits directly in the execution path between the LLM-as-Judge and any downstream consumer. No output propagates unless it clears all three gates. If a claim is contradicted by source text, or the judge's reasoning is internally incoherent, the run is halted and the output is quarantined with full reasoning traces for human review.
+
+In this mode, disabling the Auditor changes what reaches production. This is the mode in which the tool functions as **independent, differently-biased observation** — a separate lens with different failure modes to the system it oversees.
+
+### Mode B: Retrospective Evidence Generation
+
+The tool can be run asynchronously against historical outputs to generate evidence, reasoning traces, and failure analyses for human review. This is useful for assessing the reliability of an existing LLM-as-Judge pipeline or for building a body of evidence about systemic failure patterns.
+
+**Note:** In this mode, the Auditor is a detective control, not a preventive one. It tells you what happened. It does not prevent hallucinated or sycophantic outputs from reaching downstream consumers. Running Mode B and treating it as Mode A is a governance failure — it is the retrospective observation that this tool was designed to move beyond.
+
+### Transparency: The Non-Deterministic Gates
+
+Gates 2 and 3 are LLM-powered. While they are configured for near-deterministic behaviour (temperature 0.1, top_p ≤ 0.2) and grounded against provided source text rather than the model's own beliefs, they remain probabilistic. The system is tuned for high recall with a deliberate false-positive bias: borderline cases are quarantined, not passed. This means the Auditor may flag outputs that are in fact correct. It will not silently pass outputs that are flawed.
+
+The reasoning traces captured at each gate exist precisely because these judgments are not infallible. They provide the human reviewer with the Auditor's full working, so that the final determination rests with a person — not with another model.
+
+Just as no human auditor is fully deterministic, this system does not need to be either. But it does need to provide a level of determinism that delivers reasonable assurance. The fail-closed architecture, the segregation of duties between gates, and the grounding against source evidence are the mechanisms by which that assurance is achieved.
+
 ## Project Structure
 
 ```
