@@ -24,6 +24,8 @@ Gates 2 and 3 are LLM-powered but **separated by duty** and **grounded against p
 
 The auditor generates a standalone HTML dashboard to visualize run telemetry, failure rates, and the LLM's deep reasoning traces.
 
+This observability is critical for distinguishing between basic epistemic errors (factual hallucinations) and complex cognitive failures (where the model ties itself in logical knots to justify a bad decision).
+
 [![View Live Dashboard](https://SourceCodeVault.github.io/Correspondence-Auditor/output/sample_run/dashboard.png)](https://SourceCodeVault.github.io/Correspondence-Auditor/output/sample_run/audit_dashboard.html)
 
 *(To view the live demo, click the image above. The dashboard runs entirely in the browser with no backend required).*
@@ -67,7 +69,7 @@ Gate 2 catches the contradiction. It fails the run, prevents the output from mov
 
 ## Integrating into Existing Pipelines
 
-The Correspondence Auditor is designed with segregation of duties in mind. While it comes with a CLI (`run_audit.py`) for asynchronous batch processing of files, the core engine is fully modular.
+The Correspondence Auditor is designed with strict segregation of duties in mind. While it comes with a CLI (`run_audit.py`) for asynchronous batch processing of files, the core engine is fully modular.
 
 You can import the individual gates directly into your existing Python application and pass them standard dictionaries, entirely bypassing the file system:
 
@@ -170,7 +172,7 @@ The auditor is **domain-agnostic** — it validates any LLM-as-Judge output agai
 
 ## Status
 
-Working production code with 16 months of deployment data. Currently being transitioned to community-owned infrastructure under **AGPLv3**.
+Working production code. The core concepts have been battle tested in production over 9 months of active development, evolving as the third line of defence within a larger 16-month production workflow.  Currently being transitioned to community-owned infrastructure under **AGPLv3**.
 
 ## License
 
