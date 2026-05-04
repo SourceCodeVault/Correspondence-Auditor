@@ -58,24 +58,49 @@ def _extract_candidate_string(text: str) -> str | None:
 
     # 2. Try to find the outermost JSON object {} or array []
     search_text = text.strip()
-    
+
     obj_start = search_text.find('{')
     obj_end = search_text.rfind('}')
-    
     arr_start = search_text.find('[')
     arr_end = search_text.rfind(']')
 
-    candidate = None
-    
-    if obj_start != -1 and obj_end != -1 and obj_end > obj_start:
-        if arr_start == -1 or arr_start > obj_start:
-            candidate = search_text[obj_start : obj_end + 1]
-            
-    if arr_start != -1 and arr_end != -1 and arr_end > arr_start:
-        if obj_start == -1 or obj_start > arr_start:
-            candidate = search_text[arr_start : arr_end + 1]
+    obj_candidate = (
+        search_text[obj_start : obj_end + 1]
+        if (obj_start != -1 and obj_end > obj_start)
+        else ""
+    )
+    arr_candidate = (
+        search_text[arr_start : arr_end + 1]
+        if (arr_start != -1 and arr_end > arr_start)
+        else ""
+    )
 
-    return candidate
+    # Heuristic: prefer whichever block is actually valid JSON.
+    # This avoids being fooled by stray brackets in prose
+    # (e.g. "[AGENT_TRANSCRIPT]" appearing before the real {...}).
+    if obj_candidate:
+        try:
+            json.loads(obj_candidate)
+            return obj_candidate
+        except json.JSONDecodeError:
+            pass
+
+    if arr_candidate:
+        try:
+            json.loads(arr_candidate)
+            return arr_candidate
+        except json.JSONDecodeError:
+            pass
+
+    # Neither parses cleanly — repair will be needed downstream.
+    # Prefer the dict candidate: model structured outputs are dicts
+    # far more often than top-level arrays, and a stray `[...]` token
+    # in prose combined with rfind(']') commonly inflates the array
+    # span past the dict span, making "longer" the wrong heuristic.
+    if obj_candidate:
+        return obj_candidate
+    return arr_candidate or None
+
 
 def extract_json_from_string(
     text: str, 
