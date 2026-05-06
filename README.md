@@ -90,6 +90,8 @@ sanity_result = run_gate_1_sanity(llm_output_dict)
 
 **Backend-agnostic.** Gates 2 and 3 support configurable LLM backends (local Ollama, OpenRouter, or Cerebras), so you can run the audit pipeline entirely on-premises if your threat model requires it.
 
+**Heterogeneous Model Architecture (Anti-Collusion).** To prevent shared-blind-spot vulnerabilities, the Correspondence Auditor (Line 3) **must** be set in the prompt files to a different foundation model family than the Judge (Line 2). If both layers share the same weights, the Auditor is highly likely to suffer from correlated hallucination - silently validating the Judge's flawed logic. (e.g., If Line 3 [/prompts/L3*] is `Qwen`, Line 2 [/prompts/L2*] could be `Llama`, `Mistral`, or `Deepseek`). Note that all model families very likely share overlapping training material; this principle is a partial mitigation, not a cure.
+
 ## Deployment Modes & Governance Posture
 
 The Correspondence Auditor supports two deployment modes with fundamentally different governance postures.
