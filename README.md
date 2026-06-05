@@ -2,6 +2,15 @@
 
 An open-source, high-integrity audit layer that sits **downstream** of any LLM-as-Judge pipeline. It catches sycophancy, hallucination, and reasoning failures before evaluated outputs reach downstream consumers.
 
+## 🚨 EARLY ACCESS: V2 ENGINE 🚨
+
+This repository will shortly be updated to host the **Correspondence Auditor (v2.0)**, released in tandem with our upcoming academic paper.  
+
+You can get early access today to the fully functional, ready-to-use v2 software directly from our research paper repository here:  
+**[GitHub - SourceCodeVault - LLM-as-Judge-Deception-Audit](https://github.com/SourceCodeVault/LLM-as-Judge-Deception-Audit)**
+
+---
+
 ## The Problem
 
 LLM-as-Judge pipelines are increasingly used to evaluate AI outputs in safety-critical domains. But the evaluating model can tell the evaluated model what it wants to hear rather than what is true. There is currently no standard infrastructure for auditing the judge's own work.
